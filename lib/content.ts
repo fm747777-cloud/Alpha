@@ -48,7 +48,7 @@ const en = {
     text: "ALPHA brings software engineering, AI and strategic thinking together in one team. Strategy moves into design, design into code, and code into a product in people's hands, without the idea being rebuilt at every handoff.",
   },
   pack: {
-    title: "Six disciplines, one pack.",
+    title: "We Don't Just Build Tech.\nWe Build What's Next.",
     lede: "Each job has a specialist, and they all move in one direction: yours.",
     items: [
       {
@@ -78,7 +78,7 @@ const en = {
     ],
   },
   work: {
-    title: "Ground we have covered.",
+    title: "We Don't Imagine the Future.\nWe Build It.",
     lede: "Products we designed, built and shipped across education, healthcare, commerce and business operations.",
     view: "Read the case",
     live: "Live",
@@ -265,7 +265,7 @@ const ar: Dict = {
     ],
   },
   work: {
-    title: "أرض قطعناها.",
+    title: "نحن لا نتخيّل المستقبل.\nنحن نصنعه.",
     lede: "منتجات صممناها وبنيناها وأطلقناها في التعليم والرعاية الصحية والتجارة وإدارة الأعمال.",
     view: "اقرأ التفاصيل",
     live: "يعمل الآن",

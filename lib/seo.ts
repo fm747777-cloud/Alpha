@@ -19,9 +19,9 @@ export function pageMetadata(locale: Locale, path: string, title: string | null,
     alternates: {
       canonical: url,
       languages: {
-        ar: absolute(href("ar", path)),
         en: absolute(href("en", path)),
-        "x-default": absolute(href("ar", path)),
+        ar: absolute(href("ar", path)),
+        "x-default": absolute(href("en", path)),
       },
     },
     openGraph: {

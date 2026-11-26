@@ -9,14 +9,52 @@ export default function Header({ locale, dict, altHref }: { locale: Locale; dict
   // Dark is the default. The choice is remembered in localStorage and applied before paint by Shell.
   const [light, setLight] = useState(false);
   useEffect(() => {
-    setLight(document.documentElement.dataset.theme === "light");
-  }, []);
+    const syncTheme = () => {
+      let savedLight = document.documentElement.dataset.theme === "light";
+      try {
+        const stored = localStorage.getItem("alpha-theme");
+        if (stored === "light") savedLight = true;
+        else if (stored === "dark") savedLight = false;
+      } catch {
+        /* private mode */
+      }
+      if (savedLight) {
+        if (document.documentElement.dataset.theme !== "light") {
+          document.documentElement.dataset.theme = "light";
+        }
+        document.querySelector('meta[name="theme-color"]')?.setAttribute("content", "#f1f6ff");
+      } else {
+        if (document.documentElement.dataset.theme) {
+          delete document.documentElement.dataset.theme;
+        }
+        document.querySelector('meta[name="theme-color"]')?.setAttribute("content", "#03060d");
+      }
+      setLight(savedLight);
+    };
+    syncTheme();
+    const obs = new MutationObserver(() => {
+      setLight(document.documentElement.dataset.theme === "light");
+    });
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    window.addEventListener("storage", syncTheme);
+    return () => {
+      obs.disconnect();
+      window.removeEventListener("storage", syncTheme);
+    };
+  }, [locale]);
   const toggleTheme = () => {
-    const next = !light;
+    const w = window as Window & { __alphaToggleTheme?: () => boolean | undefined };
+    if (typeof w.__alphaToggleTheme === "function") {
+      w.__alphaToggleTheme();
+      setLight(document.documentElement.dataset.theme === "light");
+      return;
+    }
+    const current = document.documentElement.dataset.theme === "light";
+    const next = !current;
     setLight(next);
     if (next) document.documentElement.dataset.theme = "light";
     else delete document.documentElement.dataset.theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", next ? "#f1f6ff" : "#03060d");
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", next ? "#F1F6FF" : "#03060d");
     try {
       localStorage.setItem("alpha-theme", next ? "light" : "dark");
     } catch {

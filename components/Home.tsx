@@ -3,16 +3,17 @@ import Footer from "./Footer";
 import Header from "./Header";
 import JsonLd from "./JsonLd";
 import ProjectName from "./ProjectName";
+import ProcessConstellation from "./ProcessConstellation";
 import Scroll from "./Scroll";
+import ServicesKinetic from "./ServicesKinetic";
+import WorkShowcase from "./WorkShowcase";
 import type { Dict } from "@/lib/content";
-import { projects } from "@/lib/projects";
 import { homeLd } from "@/lib/seo";
 import { href, site, type Locale } from "@/lib/site";
 
 const two = (n: number) => String(n).padStart(2, "0");
 
 export default function Home({ locale, dict }: { locale: Locale; dict: Dict }) {
-  const services = dict.pack.items;
   const steps = dict.hunt.steps;
 
   return (
@@ -36,7 +37,7 @@ export default function Home({ locale, dict }: { locale: Locale; dict: Dict }) {
             width={1600}
             height={1000}
             alt=""
-            loading="lazy"
+            fetchPriority="high"
             decoding="async"
           />
           {/* Static hologram artwork; the entrance animation is handled in CSS. */}
@@ -147,128 +148,14 @@ export default function Home({ locale, dict }: { locale: Locale; dict: Dict }) {
           </div>
         </section>
 
-        {/* 3. Services: one turn of the mark per discipline */}
-        <section
-          className="pin pin--services"
-          id="services"
-          data-pin
-          data-steps={services.length}
-          data-stage="services"
-          aria-labelledby="services-title"
-        >
-          <div className="pin__stick">
-            <div className="wrap services">
-              <div className="services__copy">
-                <header>
-                  <h2 className="h2" id="services-title">
-                    {dict.pack.title}
-                  </h2>
-                  <p className="lede">{dict.pack.lede}</p>
-                </header>
-                <ol className="services__list">
-                  {services.map((s, i) => (
-                    <li key={s.name} className={i === 0 ? "service is-active" : "service"} data-step={i}>
-                      <span className="service__num" aria-hidden="true">
-                        {two(i + 1)}
-                      </span>
-                      <div>
-                        <h3>{s.name}</h3>
-                        <p>{s.text}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-                <div className="meter" aria-hidden="true">
-                  <span />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* 3. Services: Interactive Kinetic Signal Strips */}
+        <ServicesKinetic locale={locale} dict={dict} />
 
-        {/* 4. Work: a horizontal walk through what we shipped */}
-        <section className="pin pin--work" id="work" data-pin data-stage="work" aria-labelledby="work-title">
-          <div className="pin__stick">
-            <div className="work">
-              <header className="wrap work__head">
-                <h2 className="h2" id="work-title">
-                  {dict.work.title}
-                </h2>
-                <p className="lede">{dict.work.lede}</p>
-              </header>
-              <ul className="work__track" data-track>
-                {projects.map((p, i) => (
-                  <li key={p.slug} className="case">
-                    <a href={href(locale, `/work/${p.slug}`)}>
-                      <div className="case__shot" data-tilt>
-                        <img
-                          src={`/media/work/${p.image}-760.webp`}
-                          srcSet={`/media/work/${p.image}-760.webp 760w, /media/work/${p.image}-1400.webp 1400w`}
-                          sizes="(max-width: 760px) 82vw, 520px"
-                          width={1400}
-                          height={1084}
-                          alt={`${p.title} — ${p.category[locale]}`}
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </div>
-                      <div className="case__meta">
-                        <span>{two(i + 1)}</span>
-                        <span>{p.category[locale]}</span>
-                        {p.live ? <span className="live">{dict.work.live}</span> : null}
-                      </div>
-                      <h3>
-                        <bdi>{p.title}</bdi>
-                      </h3>
-                      <p>{p.summary[locale]}</p>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
+        {/* 4. Work: Interactive Project Showcase Rail */}
+        <WorkShowcase locale={locale} dict={dict} />
 
-        {/* 6. Principles, around the mark */}
-        <section className="pin pin--about" id="about" data-pin data-stage="about" aria-labelledby="about-title">
-          <div className="pin__stick">
-            <div className="wrap about">
-              <header className="about__head">
-                <h2 className="h2" id="about-title">
-                  {dict.about.title}
-                </h2>
-                <p className="lede">{dict.about.lede}</p>
-              </header>
-              <dl className="about__points">
-                {dict.about.principles.map((p) => (
-                  <div key={p.name}>
-                    <dt>{p.name}</dt>
-                    <dd>{p.text}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          </div>
-        </section>
-
-        {/* 7. Industries and questions */}
-        <section className="section" data-stage="quiet" aria-labelledby="industries-title">
-          <div className="wrap">
-            <p className="statement" data-reveal>
-              {dict.manifesto.text}
-            </p>
-            <h2 className="eyebrow" id="industries-title">
-              {dict.about.industriesTitle}
-            </h2>
-            <ul className="industries">
-              {dict.about.industries.map((x) => (
-                <li key={x} data-reveal>
-                  {x}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
+        {/* 6 & 7. About, Company Philosophy & Industries: Process Constellation */}
+        <ProcessConstellation locale={locale} dict={dict} />
 
         <section className="section faq" id="faq" aria-labelledby="faq-title">
           <div className="wrap faq__grid">

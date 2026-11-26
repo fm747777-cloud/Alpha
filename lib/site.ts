@@ -1,6 +1,6 @@
 export type Locale = "ar" | "en";
-export const locales: Locale[] = ["ar", "en"];
-export const defaultLocale: Locale = "ar";
+export const locales: Locale[] = ["en", "ar"];
+export const defaultLocale: Locale = "en";
 
 export const site = {
   name: "ALPHA Software Solutions",
@@ -12,10 +12,10 @@ export const site = {
   email: "Info@Alpha.Com",
 };
 
-/** Arabic lives at the root, English under /en. Paths always end with a slash. */
+/** English lives at the root, Arabic under /ar. Paths always end with a slash. */
 export function href(locale: Locale, path = "/"): string {
   const clean = path.startsWith("/") ? path : `/${path}`;
-  const prefixed = locale === "en" ? `/en${clean}` : clean;
+  const prefixed = locale === "ar" ? `/ar${clean === "/" ? "" : clean}` : clean;
   if (prefixed.includes("#")) return prefixed;
   return prefixed.endsWith("/") ? prefixed : `${prefixed}/`;
 }

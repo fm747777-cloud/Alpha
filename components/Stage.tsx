@@ -445,6 +445,8 @@ export default function Stage() {
       const rim = new THREE.PointLight(0x2f86ff, 110, 30);
       rim.position.set(3.5 * side, 1.5, -3.5);
       scene.add(rim);
+      const hemi = new THREE.HemisphereLight(0xffffff, 0xd9eef9, 0);
+      scene.add(hemi);
 
       // ---- The mark, extruded -------------------------------------------
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${LOGO_VIEWBOX.w} ${LOGO_VIEWBOX.h}"><path fill-rule="evenodd" d="${LOGO_PATH}"/></svg>`;
@@ -752,9 +754,9 @@ export default function Stage() {
         tctx.clearRect(0, 0, W, H);
 
         const cyan = light ? "#055FD9" : "#1D91F9";
-        const brightCyan = light ? "#00CFFF" : "#00CFFF";
-        const deepBlue = light ? "rgba(5, 95, 217, 0.28)" : "rgba(5, 95, 217, 0.34)";
-        const glowColor = light ? "rgba(0, 207, 255, 0.38)" : "rgba(0, 207, 255, 0.68)";
+        const brightCyan = light ? "#1D91F9" : "#00CFFF";
+        const deepBlue = light ? "rgba(175, 193, 216, 0.85)" : "rgba(5, 95, 217, 0.34)";
+        const glowColor = light ? "rgba(0, 207, 255, 0.55)" : "rgba(0, 207, 255, 0.68)";
 
         // 1. Subtle inter-module seam glow and recessed chip frames
         for (let i = 0; i < cells.length; i++) {
@@ -764,13 +766,13 @@ export default function Stage() {
           const pd = (m.d / spanZ) * H;
 
           // Subtle edge bevel highlight on modules
-          tctx.strokeStyle = light ? "rgba(10, 69, 216, 0.14)" : "rgba(70, 155, 255, 0.16)";
+          tctx.strokeStyle = light ? "rgba(175, 193, 216, 0.62)" : "rgba(70, 155, 255, 0.16)";
           tctx.lineWidth = Math.max(1, W / 1024);
           tctx.strokeRect(ux - pw * 0.46, uz - pd * 0.46, pw * 0.92, pd * 0.92);
 
           if (m.detail === 4 || m.detail === 3) {
             // Recessed inner memory chip die frame
-            tctx.fillStyle = light ? "rgba(10, 45, 130, 0.07)" : "rgba(2, 6, 16, 0.55)";
+            tctx.fillStyle = light ? "rgba(217, 238, 249, 0.65)" : "rgba(2, 6, 16, 0.55)";
             tctx.fillRect(ux - pw * 0.34, uz - pd * 0.34, pw * 0.68, pd * 0.68);
             tctx.strokeStyle = deepBlue;
             tctx.lineWidth = Math.max(1.2, W / 900);
@@ -1012,9 +1014,9 @@ export default function Stage() {
         for (let i = 0; i < cells.length; i++) {
           const s = cells[i].shade;
           if (light) {
-            // Matching elegant silver-blue RAM module surfaces
-            const v = 0.62 + s * 0.22;
-            tint.setRGB(v * 0.88, v * 0.94, Math.min(1, v * 1.06));
+            // Matching elegant white and soft-blue RAM module surfaces (#FFFFFF to #D9EEF9)
+            const v = 0.9 + s * 0.14;
+            tint.setRGB(Math.min(1, v * 0.94), Math.min(1, v * 0.97), Math.min(1, v * 1.04));
           } else {
             // Deep Midnight Navy (#001331) and Deep Blue (#04196A) memory module surfaces
             const v = 0.014 + s * 0.034;
@@ -1023,17 +1025,22 @@ export default function Stage() {
           tiles.setColorAt(i, tint);
         }
         if (tiles.instanceColor) tiles.instanceColor.needsUpdate = true;
-        tileMat.metalness = light ? 0.28 : 0.84;
-        tileMat.roughness = light ? 0.32 : 0.26;
-        tileMat.envMapIntensity = light ? 0.98 : 0.72;
-        traceMat.opacity = light ? 0.82 : 0.96;
-        wolfGlowMat.opacity = light ? 0.45 : 0.85;
-        phoneContactMat.opacity = light ? 0.48 : 0.78;
+        tileMat.metalness = light ? 0.08 : 0.84;
+        tileMat.roughness = light ? 0.34 : 0.26;
+        tileMat.envMapIntensity = light ? 0.45 : 0.72;
+        tileMat.emissive.setHex(light ? 0xd9eef9 : 0x000000);
+        tileMat.emissiveIntensity = light ? 0.38 : 0;
+        traceMat.opacity = light ? 0.92 : 0.96;
+        wolfGlowMat.blending = light ? THREE.NormalBlending : THREE.AdditiveBlending;
+        wolfGlowMat.opacity = light ? 0.65 : 0.85;
+        wolfGlowMat.needsUpdate = true;
+        phoneContactMat.opacity = light ? 0.64 : 0.78;
         paintCircuitOverlay(light);
         (scene.fog as InstanceType<typeof THREE.Fog>).color.set(light ? 0xf1f6ff : 0x001331);
-        rim.intensity = light ? 40 : 110;
-        key.intensity = light ? 1.35 : 1.5;
-        scene.environmentIntensity = light ? 0.85 : 1;
+        hemi.intensity = light ? 2.35 : 0;
+        rim.intensity = light ? 52 : 110;
+        key.intensity = light ? 1.55 : 1.5;
+        scene.environmentIntensity = light ? 0.88 : 1;
       };
       applyTheme();
       const themeWatch = new MutationObserver(applyTheme);

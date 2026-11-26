@@ -49,6 +49,55 @@ export default function Scroll() {
       last: -1,
     }));
 
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
+    const navEntry =
+      typeof performance !== "undefined" && typeof performance.getEntriesByType === "function"
+        ? (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined)
+        : undefined;
+    const isReload =
+      Boolean((window as Window & { __alphaReloadClearedHash?: boolean }).__alphaReloadClearedHash) ||
+      navEntry?.type === "reload";
+    const path = window.location.pathname;
+    const isHomepage = path === "/" || path === "/ar" || path === "/ar/";
+    if (isHomepage && isReload && window.location.hash) {
+      window.history.replaceState(null, "", path + window.location.search);
+    }
+
+    const initialHash = isHomepage && isReload ? "" : window.location.hash;
+    let userInteracted = false;
+    const markInteracted = () => {
+      userInteracted = true;
+    };
+    window.addEventListener("wheel", markInteracted, { passive: true, once: true });
+    window.addEventListener("touchstart", markInteracted, { passive: true, once: true });
+    window.addEventListener("keydown", markInteracted, { passive: true, once: true });
+    window.addEventListener("pointerdown", markInteracted, { passive: true, once: true });
+    cleanups.push(() => {
+      window.removeEventListener("wheel", markInteracted);
+      window.removeEventListener("touchstart", markInteracted);
+      window.removeEventListener("keydown", markInteracted);
+      window.removeEventListener("pointerdown", markInteracted);
+    });
+
+    const alignInitialScroll = () => {
+      if (userInteracted) return;
+      if (!initialHash && !window.location.hash) {
+        if (window.scrollY !== 0) {
+          window.scrollTo(0, 0);
+        }
+      } else if (initialHash) {
+        const id = decodeURIComponent(initialHash.slice(1));
+        const target = id ? document.getElementById(id) : null;
+        if (target) {
+          const top = window.scrollY + target.getBoundingClientRect().top;
+          window.scrollTo(0, Math.max(0, top));
+        }
+      }
+    };
+
     const measure = () => {
       for (const pin of pins) {
         if (!pin.track) continue;
@@ -57,8 +106,15 @@ export default function Scroll() {
         pin.el.style.setProperty("--travel", `${travel}px`);
         pin.el.style.height = wide ? `${window.innerHeight + travel}px` : "";
       }
+      if (!userInteracted && !initialHash && !window.location.hash && window.scrollY !== 0) {
+        window.scrollTo(0, 0);
+      }
     };
+    alignInitialScroll();
     measure();
+    alignInitialScroll();
+    const initialSettleTimer = window.setTimeout(alignInitialScroll, 120);
+    cleanups.push(() => window.clearTimeout(initialSettleTimer));
     window.addEventListener("resize", measure);
     cleanups.push(() => window.removeEventListener("resize", measure));
 
@@ -81,6 +137,7 @@ export default function Scroll() {
       const max = root.scrollHeight - vh;
       root.style.setProperty("--page", max > 0 ? (window.scrollY / max).toFixed(4) : "0");
     };
+    update();
 
     // Smooth, weighted scrolling on desktop. Touch devices keep native scroll.
     let raf = 0;
@@ -99,6 +156,18 @@ export default function Scroll() {
         if (disposed) return;
         const lenis = new Lenis({ lerp: 0.085, anchors: true });
         cleanups.push(() => lenis.destroy());
+        if (!userInteracted) {
+          if (!initialHash && !window.location.hash) {
+            window.scrollTo(0, 0);
+            lenis.scrollTo(0, { immediate: true });
+          } else if (initialHash) {
+            const id = decodeURIComponent(initialHash.slice(1));
+            const target = id ? document.getElementById(id) : null;
+            if (target) {
+              lenis.scrollTo(target, { immediate: true });
+            }
+          }
+        }
         loop(lenis);
       });
     } else {
